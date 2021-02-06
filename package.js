@@ -6,8 +6,8 @@ Package.describe({
 });
 
 Npm.depends({
-  "mturk-api": "1.3.2",
-  jspath: "0.3.2",
+  // "mturk-api": "1.3.2",
+  // jspath: "0.3.2",
   deepmerge: "0.2.7" // For merging config parameters
 });
 
@@ -39,6 +39,8 @@ Package.onUse(function(api) {
 
   // Non-core packages
   api.use("aldeed:template-extension@3.4.3");
+
+  api.use("peerlibrary:aws-sdk@2.531.0_1");
 
   api.use("mizzao:bootboxjs@4.4.0");
   api.use("iron:router@1.0.11");

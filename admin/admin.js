@@ -213,7 +213,8 @@ Meteor.methods({
   "ts-admin-account-balance"() {
     TurkServer.checkAdmin();
     try {
-      return TurkServer.mturk("GetAccountBalance", {});
+      const { AvailableBalance } = TurkServer.mturk.getAccountBalanceSync();
+      return AvailableBalance;
     } catch (e) {
       throw new Meteor.Error(403, e.toString());
     }
@@ -256,7 +257,9 @@ Meteor.methods({
 
     let hitTypeId = null;
     try {
-      hitTypeId = TurkServer.mturk("RegisterHITType", params);
+      const { HITTypeId } = TurkServer.mturk.createHITTypeSync(params);
+      hitTypeId = HITTypeId;
+      // hitTypeId = TurkServer.mturk("RegisterHITType", params);
     } catch (e) {
       throw new Meteor.Error(500, e.toString());
     }
@@ -278,7 +281,9 @@ Meteor.methods({
 
     let hitId = null;
     try {
-      hitId = TurkServer.mturk("CreateHIT", params);
+      // hitId = TurkServer.mturk("CreateHIT", params);
+      const { HITId } = TurkServer.mturk.createHITwithHITTypeSync(params);
+      hitId = HITId;
     } catch (e) {
       throw new Meteor.Error(500, e.toString());
     }
@@ -299,7 +304,8 @@ Meteor.methods({
       throw new Meteor.Error(400, "HIT ID not specified");
     }
     try {
-      const hitData = TurkServer.mturk("GetHIT", { HITId });
+      // const hitData = TurkServer.mturk("GetHIT", { HITId });
+      const hitData = TurkServer.mturk.getHITSync({ HITId });
       HITs.update({ HITId }, { $set: hitData });
     } catch (e) {
       throw new Meteor.Error(500, e.toString());
@@ -312,6 +318,7 @@ Meteor.methods({
       throw new Meteor.Error(400, "HIT ID not specified");
     }
     try {
+      //Need to change this to UpdateExpiration
       const hitData = TurkServer.mturk("ForceExpireHIT", { HITId });
 
       this.unblock(); // If successful, refresh the HIT
@@ -328,7 +335,8 @@ Meteor.methods({
 
     // TODO: don't allow change if the old HIT Type has a different batchId from the new one
     try {
-      TurkServer.mturk("ChangeHITTypeOfHIT", params);
+      TurkServer.mturk.updateHITTypeOfHITSync(params);
+      // TurkServer.mturk("ChangeHITTypeOfHIT", params);
       this.unblock(); // If successful, refresh the HIT
       Meteor.call("ts-admin-refresh-hit", params.HITId);
     } catch (e) {
@@ -345,6 +353,7 @@ Meteor.methods({
     getAndCheckHitType(hit.HITTypeId);
 
     try {
+      //Need to change this to update expiration
       TurkServer.mturk("ExtendHIT", params);
 
       this.unblock(); // If successful, refresh the HIT
@@ -411,11 +420,12 @@ Meteor.methods({
       const params = {
         Subject: email.subject,
         MessageText: email.message,
-        WorkerId: chunk
+        WorkerIds: chunk
       };
 
       try {
-        TurkServer.mturk("NotifyWorkers", params);
+        TurkServer.mturk.notifyWorkersSync(params);
+        // TurkServer.mturk("NotifyWorkers", params);
       } catch (e) {
         throw new Meteor.Error(500, e.toString());
       }
